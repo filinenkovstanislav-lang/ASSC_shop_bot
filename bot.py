@@ -15,8 +15,8 @@ import aiosqlite
 logging.basicConfig(level=logging.INFO)
 
 # Чтение токена и ID администратора из переменных окружения
-BOT_TOKEN = "8665215772:AAHk0gtMDmKF_TsckX_VcqdhmCmP0AH6XF8"
-ADMIN_ID = 1242713462
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+ADMIN_ID = int(os.getenv("ADMIN_ID", "0"))
 
 if not BOT_TOKEN:
     raise ValueError("Не задан токен бота! Установите переменную окружения BOT_TOKEN")
