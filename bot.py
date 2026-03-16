@@ -15,6 +15,7 @@ import aiosqlite
 logging.basicConfig(level=logging.INFO)
 
 # Чтение токена и ID администратора из переменных окружения
+# ВАЖНО: перед запуском убедитесь, что переменные BOT_TOKEN и ADMIN_ID заданы!
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 ADMIN_ID = int(os.getenv("ADMIN_ID", "0"))
 
@@ -928,6 +929,30 @@ async def cmd_admin(message: Message):
         return
     await show_admin_panel(message)
 
+# --- Обработчик неизвестных сообщений (fallback) ---
+@dp.message()
+async def handle_unknown(message: Message):
+    logging.info(f"Получено неизвестное сообщение от {message.from_user.id}: {message.text}")
+    await message.answer(
+        "Я не понимаю эту команду. Пожалуйста, используйте кнопки меню или отправьте /start.",
+        reply_markup=get_main_keyboard(message.from_user.id)
+    )
+
+# --- Функция принудительного сброса сессий (использовать только при конфликтах) ---
+async def force_reset_bot():
+    print("Пытаюсь сбросить все сессии бота...")
+    try:
+        # Сначала удаляем вебхук, если он есть
+        await bot.delete_webhook(drop_pending_updates=True)
+        print("Вебхук удалён")
+        
+        # Затем разлогиниваем бота — это завершит ВСЕ сессии
+        await bot.log_out()
+        print("✅ Все сессии бота завершены. Бот разлогинен.")
+        print("Бот будет автоматически перезапущен и залогинен заново.")
+    except Exception as e:
+        print(f"Ошибка при сбросе сессий: {e}")
+
 # --- Запуск бота ---
 async def main():
     await init_db()
@@ -937,6 +962,15 @@ async def main():
             (ADMIN_ID,)
         )
         await db.commit()
-    # Удаляем вебхук перед запуском polling
+    
+    # Если бот долго не запускается из-за конфликта сессий, раскомментируйте следующую строку
+    # await force_reset_bot()
+    
+    # Удаляем вебхук перед запуском polling (на всякий случай)
     await bot.delete_webhook(drop_pending_updates=True)
+    
+    # Запускаем polling
     await dp.start_polling(bot)
+
+if __name__ == "__main__":
+    asyncio.run(main())

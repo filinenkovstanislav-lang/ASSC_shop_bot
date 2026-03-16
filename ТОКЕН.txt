@@ -1,0 +1,9 @@
+BOT_TOKEN = "8665215772:AAHk0gtMDmKF_TsckX_VcqdhmCmP0AH6XF8"
+ADMIN_ID = 8713990119
+
+git init
+git add .
+git commit -m "Initial commit"
+git remote add origin https://github.com/filinenkovstanislav-lang/ASSC_shop.git
+git branch -M main
+git push -u origin main
